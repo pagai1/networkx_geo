@@ -93,12 +93,9 @@ if limit != "all":
 
 ## CREATING GRAPH
 start_time = time.time()
-G = nx.read_weighted_edgelist(edgelistfile, comments="no comments", delimiter=",", create_using=nx.Graph(), nodetype=str)
-#for node in (G.nodes()):
-#    G.nodes[node]['name'] = str(node)
-print("################ INFO1")
-print(G.nodes(data=True))
-print(G.edges(data=True))
+G = nx.read_weighted_edgelist(edgelistfile, comments="no comments", delimiter=",", create_using=nx.DiGraph(), nodetype=str)
+for edge in (G.edges()):
+    G.edges()[edge]['label'] = "HAS_ROAD_TO"
 ## ADDING PROPERTIES
 with open(datafile, 'r') as data:
     reader = csv.reader(data, delimiter=';')
@@ -114,28 +111,11 @@ with open(datafile, 'r') as data:
 if (verbose):
     print("Load of " + limit + " finished in: " + to_ms(time.time() - start_time) + " s.")
     print(nx.info(G))
-    print("########################")
-
-print(G.nodes(data=True))
-
-
-#find_nodes_by_degree(G,seclimit,function=operatorFunction, verbose=verbose)
-#find_nodes_by_property_value(G,"property","value")
+    print(G.nodes(data=True))
+    print(G.edges(data=True))
 
 
-#draw_graph(G)
-
-#edgelist = []
-#nodelist = []
-#edgelist = G.edges()
-#nodelist = G.nodes()
-#for edge in edgelist:
-#    print(str(edge[0]) + " -- " + str(edge[1]))
-
-############################# ALGOS
-
-
-
+############################ ALGOS
 
 #algo_shortest_path(G)
 #algo_all_pairs_dijkstra(G,verbose=True,inputWeight='weight')
@@ -168,4 +148,5 @@ algo_all_pairs_shortest_path_astar(G,verbose=True)
 #draw_all_shortest_path_for_single_node(G,"1")
 #all_shortest_path_for_single_node(G,"12")
 
-draw_graph(G)
+if (verbose):
+    draw_graph(G)
