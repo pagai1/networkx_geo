@@ -37,9 +37,21 @@ def cleanupAll(tmpfilepath):
     print("CLEANING UP.")
     os.remove(tmpfilepath)
 
-def draw_graph(Graph):
-    nx.draw_kamada_kawai(Graph,with_labels=True)
-    plt.plot()
+def draw_graph(G):
+    pos = nx.spring_layout(G)
+    #edge_labels = dict([((n1, n2), f"{n3['weight']") for n1, n2, n3 in G.edges])
+#    nx.draw_networkx(G, pos, edge_color="blue")
+    #### FIRST WAY TO GET EDGELABELS
+   # edge_labels = dict([((n1, n2), G[n1][n2]["weight"]) for n1, n2 in G.edges])
+   # nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
+    nx.draw_networkx_nodes(G, pos)
+    nx.draw_networkx_edges(G, pos, connectionstyle="arc3,rad=0.1", edge_color="red", label=nx.get_edge_attributes(G,'weight'))
+    
+    #### SECOND WAY TO GET EDGELABELS
+    #nx.draw_networkx_edge_labels(G, pos, edge_labels=nx.get_edge_attributes(G,'weight'), label_pos=0.25, horizontalalignment="left")
+        
+    #nx.draw_kamada_kawai(G,with_labels=True)
+    #plt.plot()
     plt.show()
 
 #
@@ -54,7 +66,8 @@ tmpfilepath = "/tmp/tmpfile.csv"
 limit = 0
 seclimit=1
 operatorFunction="eq"
-verbose=True
+verbose=False
+drawit=False
 #catchable_sigs = set(signal.Signals) - {signal.SIGKILL, signal.SIGSTOP}
 #for sig in catchable_sigs:
 #    signal.signal(sig, tmpfilepath)  # Substitute handler of choice for `print`
@@ -114,22 +127,33 @@ if (verbose):
     print(G.nodes(data=True))
     print(G.edges(data=True))
 
+############ ALGOS #############
 
-############################ ALGOS
-
+#### SHORTEST PATH
 #algo_shortest_path(G)
 #algo_all_pairs_dijkstra(G,verbose=True,inputWeight='weight')
 #algo_all_pairs_bellman_ford_path(G,verbose=True,inputWeight='weight')
 
 #all_pairs_shortest_path(G)
-#algo_pagerank(G, None, "default", False)
-#algo_pagerank(G, None, "numpy", False)
-#algo_pagerank(G, None , "scipy", True)
-#algo_simRank(G,verbose=True,max_iterations=1)
-#algo_degree_centrality(G, verbose=True)
+
 #algo_all_pairs_shortest_path(G,verbose=False,inputWeight='weight')
+#draw_all_shortest_path_for_single_node(G,"1")
+#all_shortest_path_for_single_node(G,"12")
 
 
+#### SHORTESTPATH ASTAR
+#algo_all_pairs_shortest_path_astar(G,verbose=verbose)
+
+#### PAGERANK
+
+#algo_pagerank(G, "default",  weightInput=None, verbose=True)
+#algo_pagerank(G, "numpy", weightInput=None, verbose=True)
+algo_pagerank(G, "scipy", weightInput=None, verbose=True, maxLineOutput=10)
+
+#### SIMRANK
+#algo_simRank(G,verbose=True,max_iterations=1)
+
+#### DEGREE CENTRALITY
 # Degree Centrality - own
 #verbose=True
 #peng = sorted(G.degree, key=lambda x: x[1], reverse=True)
@@ -139,14 +163,10 @@ if (verbose):
 
 # Degree Centrality - native
 #algo_degree_centrality(G, verbose=False)
-algo_all_pairs_shortest_path_astar(G,verbose=True)
-   
-#print(str(G.number_of_nodes()) + "," + str(G.number_of_edges()) + "," + to_ms(end_time-start_time))
-#algo_jaccard_coefficient(G,G.edges(),verbose=True) 
+
+#### HITS
 
 #get_hits(G)
-#draw_all_shortest_path_for_single_node(G,"1")
-#all_shortest_path_for_single_node(G,"12")
 
-if (verbose):
+if (drawit):
     draw_graph(G)
