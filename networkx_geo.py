@@ -67,7 +67,12 @@ limit = 0
 seclimit=1
 operatorFunction="eq"
 verbose=False
+doAlgo=True
+algoVerbose=True
 drawit=False
+doExport=False
+#createBy="import"
+createBy="readEdgeList"
 #catchable_sigs = set(signal.Signals) - {signal.SIGKILL, signal.SIGSTOP}
 #for sig in catchable_sigs:
 #    signal.signal(sig, tmpfilepath)  # Substitute handler of choice for `print`
@@ -106,16 +111,17 @@ if limit != "all":
 
 ## CREATING GRAPH
 start_time = time.time()
-G = nx.read_weighted_edgelist(edgelistfile, comments="no comments", delimiter=",", create_using=nx.DiGraph(), nodetype=str)
-for edge in (G.edges()):
-    G.edges()[edge]['label'] = "HAS_ROAD_TO"
-## ADDING PROPERTIES
-with open(datafile, 'r') as data:
-    reader = csv.reader(data, delimiter=';')
-    for row in reader:
-        G.nodes[row[0]]['name'] = row[1]
-        G.nodes[row[0]]['y'] = row[2]
-        G.nodes[row[0]]['x'] = row[3]
+if createBy == "readEdgeList":
+    G = nx.read_weighted_edgelist(edgelistfile, comments="no comments", delimiter=",", create_using=nx.DiGraph(), nodetype=str)
+    for edge in (G.edges()):
+        G.edges()[edge]['label'] = "HAS_ROAD_TO"
+    ## ADDING PROPERTIES
+    with open(datafile, 'r') as data:
+        reader = csv.reader(data, delimiter=';')
+        for row in reader:
+            G.nodes[row[0]]['name'] = row[1]
+            G.nodes[row[0]]['y'] = row[2]
+            G.nodes[row[0]]['x'] = row[3]
         
 
 #for node in (G.nodes())
@@ -127,46 +133,68 @@ if (verbose):
     print(G.nodes(data=True))
     print(G.edges(data=True))
 
+############ Export/Import ##########
+if (doExport):
+    export_graph_to_node_link_data(G, '/tmp/node_link_data_export.json', verbose=False)
+
+if createBy == "import":
+    start_time = time.time()
+    G = import_node_link_data_to_graph('/tmp/node_link_data_export.json', verbose=False)
+    if (verbose): 
+        print("IMPORTED FILE.")
+        print(nx.info(G))
+
 ############ ALGOS #############
 
-#### SHORTEST PATH
-#algo_shortest_path(G)
-#algo_all_pairs_dijkstra(G,verbose=True,inputWeight='weight')
-#algo_all_pairs_bellman_ford_path(G,verbose=True,inputWeight='weight')
-
-#all_pairs_shortest_path(G)
-
-#algo_all_pairs_shortest_path(G,verbose=False,inputWeight='weight')
-#draw_all_shortest_path_for_single_node(G,"1")
-#all_shortest_path_for_single_node(G,"12")
-
-
-#### SHORTESTPATH ASTAR
-#algo_all_pairs_shortest_path_astar(G,verbose=verbose)
-
-#### PAGERANK
-
-#algo_pagerank(G, "default",  weightInput=None, verbose=True)
-#algo_pagerank(G, "numpy", weightInput=None, verbose=True)
-algo_pagerank(G, "scipy", weightInput=None, verbose=True, maxLineOutput=10)
-
-#### SIMRANK
-#algo_simRank(G,verbose=True,max_iterations=1)
-
-#### DEGREE CENTRALITY
-# Degree Centrality - own
-#verbose=True
-#peng = sorted(G.degree, key=lambda x: x[1], reverse=True)
-#if (verbose):
-#    for bums in peng:
-#        print(bums)
-
-# Degree Centrality - native
-#algo_degree_centrality(G, verbose=False)
-
-#### HITS
-
-#get_hits(G)
+if (doAlgo):
+    print(nx.info(G))
+    #### SHORTEST PATH
+    #algo_shortest_path(G)
+    #algo_all_pairs_dijkstra(G,verbose=True,inputWeight='weight')
+    #algo_all_pairs_bellman_ford_path(G,verbose=True,inputWeight='weight')
+    
+    #all_pairs_shortest_path(G)
+    
+    #algo_all_pairs_shortest_path(G,verbose=False,inputWeight='weight')
+    #draw_all_shortest_path_for_single_node(G,"1")
+    #all_shortest_path_for_single_node(G,"12")
+    
+    
+    #### SHORTESTPATH ASTAR
+    #algo_all_pairs_shortest_path_astar(G,verbose=verbose)
+    
+    #### PAGERANK
+    weightInputForAlgos="weight"
+    #weightInputForAlgos=None
+    
+    print("==============================")
+    
+    algo_pagerank(G, "default",  weightInput=weightInputForAlgos, verbose=algoVerbose, maxLineOutput=0)
+    
+    # NUMPY IS OBSOLETE
+    algo_pagerank(G, "numpy", weightInput=weightInputForAlgos, verbose=algoVerbose, maxLineOutput=10)
+    
+    algo_pagerank(G, "scipy", weightInput=weightInputForAlgos, verbose=algoVerbose, maxLineOutput=0)
+    
+    print("==============================")
+    print("EXECUTION TOOK: " + to_ms(time.time() - start_time))
+    #### SIMRANK
+    #algo_simRank(G,verbose=True,max_iterations=1)
+    
+    #### DEGREE CENTRALITY
+    # Degree Centrality - own
+    #verbose=True
+    #peng = sorted(G.degree, key=lambda x: x[1], reverse=True)
+    #if (verbose):
+    #    for bums in peng:
+    #        print(bums)
+    
+    # Degree Centrality - native
+    #algo_degree_centrality(G, verbose=False)
+    
+    #### HITS
+    
+    #get_hits(G)
 
 if (drawit):
     draw_graph(G)
