@@ -58,21 +58,22 @@ def draw_graph(G):
 # MAIN
 #
 #
-#edgelistfile='/home/pagai/graph-data/deezer_clean_data/both.csv'
-## edgelist    
-edgelistfile='/home/pagai/graph-data/OSRM/final_edgelist.csv'
-datafile='/home/pagai/graph-data/OSRM/final_semicolon.txt'
+edgelistfile='/home/pagai/graph-data/OSRM/final_edgelist.csv'# edgelist for PLZ data
+datafile='/home/pagai/graph-data/OSRM/final_semicolon.txt' # datafile with geodata
 tmpfilepath = "/tmp/tmpfile.csv"
 limit = 0
 seclimit=1
 operatorFunction="eq"
 verbose=False
-doAlgo=True
-algoVerbose=True
+doAlgo=False
+algoVerbose=False
 drawit=False
 doExport=False
 #createBy="import"
 createBy="readEdgeList"
+
+importExportFileName = "/tmp/node_link_data_export_geodaten.json"
+
 #catchable_sigs = set(signal.Signals) - {signal.SIGKILL, signal.SIGSTOP}
 #for sig in catchable_sigs:
 #    signal.signal(sig, tmpfilepath)  # Substitute handler of choice for `print`
@@ -144,8 +145,18 @@ if createBy == "import":
         print("IMPORTED FILE.")
         print(nx.info(G))
 
-############ ALGOS #############
+########## DELETE-test Clear ################
+numberOfNodes = G.number_of_nodes()
+numberOfEdges = G.number_of_edges()
+export_graph_to_node_link_data(G, importExportFileName+"_full", verbose=verbose)
 
+start_time_clear=time.time()
+G.clear()
+export_graph_to_node_link_data(G, importExportFileName, verbose=verbose)
+end_time_clear=time.time()
+print(numberOfNodes, numberOfEdges, to_ms(end_time_clear - start_time_clear), sep=",")
+
+############ ALGOS #############
 if (doAlgo):
     print(nx.info(G))
     #### SHORTEST PATH
